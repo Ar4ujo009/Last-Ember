@@ -1,84 +1,76 @@
+-- ==========================================
+-- SERVIÇOS E DEPENDÊNCIAS
+-- ==========================================
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-
--- Atualiza referências ao respawnar
-player.CharacterAdded:Connect(function(newChar)
-    character = newChar
-end)
-
--- ==========================================
--- IMPORTAÇÕES E REFERÊNCIAS
--- ==========================================
--- Pegamos o módulo compartilhado (Shared mapeia para ReplicatedStorage.Shared pelo Rojo)
 local CombatHandler = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CombatHandler"))
-
--- Pegamos a porta da Stamina que deixamos aberta no arquivo anterior
-local staminaController = script.Parent:WaitForChild("StaminaController")
-local requestStaminaDrain = staminaController:WaitForChild("RequestStaminaDrain")
 local ClientState = require(script.Parent:WaitForChild("ClientState"))
 
 -- ==========================================
--- CONFIGURAÇÕES DE COMBATE
+-- VARIÁVEIS LOCAIS E ESTADO
 -- ==========================================
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local staminaController = script.Parent:WaitForChild("StaminaController")
+local requestStaminaDrain = staminaController:WaitForChild("RequestStaminaDrain")
+local damageEvent = ReplicatedStorage:WaitForChild("DamageEvent")
+
+-- Configurações de Combate
 local ATTACK_COOLDOWN = 0.5
 local ATTACK_STAMINA_COST = 15
-local HITBOX_DURATION = 0.3 -- Quanto tempo (em segundos) a lâmina corta o ar após clicar
+local HITBOX_DURATION = 0.3
 
 local lastAttackTime = 0
 local isAttacking = false
 
 -- ==========================================
--- LÓGICA DE CLIQUE E ATAQUE
+-- CICLO DE VIDA DO PERSONAGEM
 -- ==========================================
+player.CharacterAdded:Connect(function(newChar)
+    character = newChar
+end)
+
+-- ==========================================
+-- FUNÇÕES DE COMBATE
+-- ==========================================
+
+-- Gerencia a rotina completa de um ataque (cooldown, stamina, hitbox)
 local function PerformAttack()
-    -- 1. Verifica Cooldown e Estado (se já não está no meio de um ataque)
     if isAttacking or (tick() - lastAttackTime < ATTACK_COOLDOWN) then return end
     
-    -- 2. Verifica se tem alguma ferramenta (Tool) equipada
     local equippedTool = character:FindFirstChildOfClass("Tool")
-    if not equippedTool then return end -- Sem arma, sem ataque
+    if not equippedTool then return end
     
-    -- 3. Integração com Stamina
-    -- Invoca e pede permissão para gastar
     local hasStamina = requestStaminaDrain:Invoke(ATTACK_STAMINA_COST)
-    if not hasStamina then return end -- Sem fôlego suficiente
+    if not hasStamina then return end
     
-    -- Tudo passou! Começamos o ataque.
     isAttacking = true
     lastAttackTime = tick()
     
-    -- (Opcional Futuro: animTrack:Play() Aqui!)
-    
-    -- 4. Chamar a Hitbox (Isto trava o script localmente pela duração do HITBOX_DURATION)
-    -- Nós chamamos o ModuleScript para resolver a matemática dos raios.
     local hitTargets = CombatHandler.PerformHitbox(equippedTool, HITBOX_DURATION, character)
     
-    -- 5. Processar quem apanhou
-    local damageEvent = ReplicatedStorage:WaitForChild("DamageEvent")
     for _, hitHumanoid in ipairs(hitTargets) do
-        -- Printe exigido no log de quem foi cortado
         print("Acerto crítico (Raycast) em: " .. hitHumanoid.Parent.Name)
-        
-        -- Dispara o evento pro servidor processar o dano (Enviando o alvo e o dano: 20)
         damageEvent:FireServer(hitHumanoid, 20)
     end
     
     isAttacking = false
 end
 
--- Captura de Cliques (Esquerdo e Direito)
+-- ==========================================
+-- CAPTURA DE INPUTS
+-- ==========================================
+
+-- Lida com o clique do mouse para Ataque (LMB) e Defesa (RMB)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        -- Botão Esquerdo (Mão Direita - Ataque)
         PerformAttack()
     elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-        -- Botão Direito (Mão Esquerda - Defesa/Ação Secundária)
         local leftItem = ClientState.EquippedItems.Left
         if leftItem and string.match(leftItem, "Escudo") then
             ClientState.IsGuarding = true
@@ -89,7 +81,6 @@ end)
 
 UserInputService.InputEnded:Connect(function(input, gameProcessed)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
-        -- Ao soltar o Botão Direito, para de defender
         ClientState.IsGuarding = false
     end
 end)
