@@ -7,7 +7,7 @@ local camera = workspace.CurrentCamera
 local ClientState = require(script.Parent:WaitForChild("ClientState"))
 
 -- Configurações da Câmera
-local CAMERA_OFFSET = Vector3.new(1.5, 3, 11) -- X positivo: ombro direito. Y: altura. Z: distância para trás
+local CAMERA_OFFSET = CFrame.new(2, 1.5, 10) -- X positivo: ombro direito (direita). Y: altura (cima). Z: distância (trás)
 local CAMERA_SMOOTHNESS = 0.15 -- Valor para o Lerp (quanto menor, mais suave/pesado)
 local CHARACTER_ROTATION_SMOOTHNESS = 0.1 -- Suavidade ao rotacionar o personagem
 
@@ -76,13 +76,13 @@ local function updateCamera(deltaTime)
         local baseCFrame = CFrame.lookAt(myPos, myPos + flatLookDir)
         
         -- Aplica o CAMERA_OFFSET relativo a essa base nivelada.
-        -- Como a base não inclina para baixo, a câmera sempre ficará `CAMERA_OFFSET.Y` studs acima do jogador.
-        local camPos = (baseCFrame * CFrame.new(CAMERA_OFFSET)).Position
+        -- A câmera ficará recuada e para a direita do personagem, e subirá um pouco no eixo Y durante o lock-on.
+        local camPos = (baseCFrame * CAMERA_OFFSET).Position + Vector3.new(0, 2, 0)
         
         -- Ponto focal: miramos um pouco acima do centro do inimigo (ex: peito/cabeça) para a câmera não apontar pro chão
         local focusPos = targetPos + Vector3.new(0, 1.5, 0)
         
-        -- Faz a câmera final olhar para o ponto focal a partir da nova posição
+        -- Faz a câmera final olhar para o ponto focal a partir da nova posição calculada com o offset
         targetCameraCFrame = CFrame.lookAt(camPos, focusPos)
         
         -- Atualizamos os ângulos internos do mouse para não dar "tranco" ao destravar
@@ -94,11 +94,11 @@ local function updateCamera(deltaTime)
         -- [[ MODO OVER-THE-SHOULDER NORMAL ]]
         -- 1. Matriz na posição atual do centro do personagem.
         -- 2. Aplicamos a rotação horizontal e vertical armazenadas.
-        -- 3. Multiplicamos pelo CAMERA_OFFSET para projetar para direita, cima e trás.
+        -- 3. Multiplicamos diretamente pelo CAMERA_OFFSET (que já é um CFrame) para o recuo OTS.
         targetCameraCFrame = CFrame.new(humanoidRootPart.Position) 
             * CFrame.Angles(0, cameraAngleX, 0) 
             * CFrame.Angles(cameraAngleY, 0, 0) 
-            * CFrame.new(CAMERA_OFFSET)
+            * CAMERA_OFFSET
     end
 
     -- [[ MATEMÁTICA DA SUAVIZAÇÃO (LERP) ]]

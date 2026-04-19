@@ -56,14 +56,17 @@ local function unlockTarget()
 	end
 end
 
--- Busca o inimigo mais próximo num raio de 50 studs
-local function findNearestTarget()
+-- Busca o melhor alvo considerando distância e proximidade ao centro da tela
+local function findBestTarget()
 	local character = player.Character
 	if not character or not character:FindFirstChild("HumanoidRootPart") then return nil end
 	
 	local playerRoot = character.HumanoidRootPart
-	local nearestTarget = nil
-	local shortestDistance = LOCK_ON_RADIUS
+	local camera = Workspace.CurrentCamera
+	if not camera then return nil end
+	
+	local bestTarget = nil
+	local bestScore = math.huge -- Menor pontuação é melhor
 	
 	-- Procura em todo o Workspace por modelos que não sejam o jogador
 	for _, obj in ipairs(Workspace:GetDescendants()) do
@@ -73,15 +76,42 @@ local function findNearestTarget()
 			
 			if humanoid and rootPart and humanoid.Health > 0 then
 				local distance = (playerRoot.Position - rootPart.Position).Magnitude
-				if distance <= shortestDistance then
-					shortestDistance = distance
-					nearestTarget = obj
+				
+				if distance <= LOCK_ON_RADIUS then
+					-- Direção da câmera até o inimigo
+					local directionToTarget = (rootPart.Position - camera.CFrame.Position).Unit
+					local cameraLookVector = camera.CFrame.LookVector
+					
+					--[[ 
+						ESTUDO DO DOT PRODUCT (Produto Escalar):
+						O Dot Product entre dois vetores unitários (tamanho 1) retorna um valor de -1 a 1.
+						-  1: Os dois vetores apontam exatamente para a mesma direção (0 graus de diferença).
+						-  0: Os vetores são perpendiculares (90 graus).
+						- -1: Os vetores apontam para direções opostas (180 graus).
+						
+						Ao exigir que dotProduct > 0.5, o inimigo precisa estar
+						dentro de um cone de aproximadamente 60 graus a partir do centro da tela.
+					]]
+					local dotProduct = cameraLookVector:Dot(directionToTarget)
+					
+					if dotProduct > 0.5 then
+						-- Score baseia-se na distância + penalidade por estar fora do centro
+						-- dotProduct perfeito é 1. Se for menor, a penalidade aumenta.
+						-- Multiplicamos por 100 para que o peso do ângulo tenha impacto frente à distância em studs.
+						local anglePenalty = (1 - dotProduct) * 100
+						local score = distance + anglePenalty
+						
+						if score < bestScore then
+							bestScore = score
+							bestTarget = obj
+						end
+					end
 				end
 			end
 		end
 	end
 	
-	return nearestTarget
+	return bestTarget
 end
 
 -- Verifica as condições de destravamento automático
@@ -118,11 +148,11 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			-- Se já está com alvo, destrava
 			unlockTarget()
 		else
-			-- Se não está travado, busca o alvo mais próximo
-			local nearest = findNearestTarget()
-			if nearest then
-				lockedTarget = nearest
-				local targetRoot = nearest:FindFirstChild("HumanoidRootPart")
+			-- Se não está travado, busca o melhor alvo no campo de visão
+			local target = findBestTarget()
+			if target then
+				lockedTarget = target
+				local targetRoot = target:FindFirstChild("HumanoidRootPart")
 				
 				if targetRoot then
 					lockOnGui = createLockOnIndicator(targetRoot)
