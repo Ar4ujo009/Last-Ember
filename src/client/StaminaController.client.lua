@@ -30,44 +30,11 @@ local lastStaminaUseTime = 0
 local isHoldingSprint = false
 
 -- ==========================================
--- CRIAÇÃO DA INTERFACE VIA CÓDIGO
+-- COMUNICAÇÃO DE INTERFACE
 -- ==========================================
--- Pegamos o PlayerGui, onde ficam as interfaces do jogador
-local playerGui = player:WaitForChild("PlayerGui")
-
--- Criamos o contêiner principal da interface (ScreenGui)
-local staminaScreenGui = Instance.new("ScreenGui")
-staminaScreenGui.Name = "StaminaUI"
-staminaScreenGui.ResetOnSpawn = false -- Evita que a UI suma ou pisque quando o jogador morrer
-staminaScreenGui.Parent = playerGui
-
--- Criamos a barra de fundo (Cinza Escuro)
-local backgroundBar = Instance.new("Frame")
-backgroundBar.Name = "Background"
-backgroundBar.Size = UDim2.new(0, 250, 0, 15) -- Largura: 250 pixels, Altura: 15 pixels
-backgroundBar.Position = UDim2.new(0, 40, 0, 40) -- Canto superior esquerdo com margem de 40px
-backgroundBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40) -- Cor cinza escuro
-backgroundBar.BorderSizePixel = 0
-backgroundBar.Parent = staminaScreenGui
-
--- Adicionamos cantos arredondados ao fundo
-local bgCorner = Instance.new("UICorner")
-bgCorner.CornerRadius = UDim.new(0, 8)
-bgCorner.Parent = backgroundBar
-
--- Criamos a barra de preenchimento (Verde/Amarela)
-local fillBar = Instance.new("Frame")
-fillBar.Name = "Fill"
--- Tamanho inicial de 100% em relação à largura e altura da barra de fundo (1, 0, 1, 0)
-fillBar.Size = UDim2.new(1, 0, 1, 0)
-fillBar.BackgroundColor3 = Color3.fromRGB(150, 200, 50) -- Tom esverdeado/amarelado
-fillBar.BorderSizePixel = 0
-fillBar.Parent = backgroundBar
-
--- Adicionamos cantos arredondados também ao preenchimento
-local fillCorner = Instance.new("UICorner")
-fillCorner.CornerRadius = UDim.new(0, 8)
-fillCorner.Parent = fillBar
+local staminaChanged = Instance.new("BindableEvent")
+staminaChanged.Name = "StaminaChanged"
+staminaChanged.Parent = script
 
 
 -- ==========================================
@@ -80,6 +47,7 @@ local function DrainStamina(amount)
     currentStamina = math.clamp(currentStamina - amount, 0, MAX_STAMINA)
     -- Atualiza o tempo do último gasto, resetando o delay para regeneração
     lastStaminaUseTime = tick() 
+    staminaChanged:Fire(currentStamina, MAX_STAMINA)
 end
 
 -- Função utilitária para regenerar stamina gradualmente
@@ -87,9 +55,12 @@ local function RegenStamina(deltaTime)
     -- tick() é o tempo atual em segundos.
     -- Se a diferença entre o tempo atual e o último uso for maior que o delay estipulado...
     if tick() - lastStaminaUseTime >= REGEN_DELAY then
-        -- Calculamos o quanto regenerar com base no tempo que passou no frame (deltaTime)
-        local regenAmount = REGEN_RATE * deltaTime
-        currentStamina = math.clamp(currentStamina + regenAmount, 0, MAX_STAMINA)
+        if currentStamina < MAX_STAMINA then
+            -- Calculamos o quanto regenerar com base no tempo que passou no frame (deltaTime)
+            local regenAmount = REGEN_RATE * deltaTime
+            currentStamina = math.clamp(currentStamina + regenAmount, 0, MAX_STAMINA)
+            staminaChanged:Fire(currentStamina, MAX_STAMINA)
+        end
     end
 end
 
@@ -160,24 +131,4 @@ RunService.Heartbeat:Connect(function(deltaTime)
         RegenStamina(deltaTime)
     end
 
-    -- ==========================================
-    -- ATUALIZAÇÃO VISUAL SUAVE (UI)
-    -- ==========================================
-    -- Calculamos a porcentagem atual da stamina (vai de 0.0 a 1.0)
-    local targetScale = currentStamina / MAX_STAMINA
-    
-    -- [[ EXPLICAÇÃO DO LERP ]]
-    -- Em vez de simplesmente definir fillBar.Size = UDim2.new(targetScale, ...),
-    -- usamos o :Lerp() para que o tamanho atual "persiga" o tamanho alvo.
-    -- Multiplicamos por deltaTime para manter a suavidade independente do framerate.
-    -- Isso evita o efeito "engasgado" na UI.
-    local targetSize = UDim2.new(targetScale, 0, 1, 0)
-    fillBar.Size = fillBar.Size:Lerp(targetSize, 15 * deltaTime)
-    
-    -- Bônus: Mudança suave de cor se a stamina estiver muito baixa (< 20%)
-    if targetScale < 0.2 then
-        fillBar.BackgroundColor3 = fillBar.BackgroundColor3:Lerp(Color3.fromRGB(200, 50, 50), 10 * deltaTime) -- Fica avermelhado
-    else
-        fillBar.BackgroundColor3 = fillBar.BackgroundColor3:Lerp(Color3.fromRGB(150, 200, 50), 10 * deltaTime) -- Volta pro Verde/Amarelo
-    end
 end)
