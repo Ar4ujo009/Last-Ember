@@ -57,14 +57,13 @@ local function PerformAttack()
     local hitTargets = CombatHandler.PerformHitbox(equippedTool, HITBOX_DURATION, character)
     
     -- 5. Processar quem apanhou
+    local damageEvent = ReplicatedStorage:WaitForChild("DamageEvent")
     for _, hitHumanoid in ipairs(hitTargets) do
         -- Printe exigido no log de quem foi cortado
         print("Acerto crítico (Raycast) em: " .. hitHumanoid.Parent.Name)
         
-        -- NOTA IMPORTANTE PARA MULTIPLAYER:
-        -- Aqui no LocalScript você validou o acerto na tela do jogador (Client-Sided).
-        -- Para o monstro tomar dano de verdade (Server-Sided), você criaria um RemoteEvent:
-        -- game.ReplicatedStorage.HitEvent:FireServer(hitHumanoid)
+        -- Dispara o evento pro servidor processar o dano (Enviando o alvo e o dano: 20)
+        damageEvent:FireServer(hitHumanoid, 20)
     end
     
     isAttacking = false
