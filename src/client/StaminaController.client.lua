@@ -114,8 +114,10 @@ RunService.Heartbeat:Connect(function(deltaTime)
             humanoid.WalkSpeed = WALK_SPEED
         end
     else
-        -- Estado Padrão ou Guarda
-        if ClientState.IsGuarding then
+        -- Estado Padrão, Guarda ou Bebendo
+        if ClientState.IsDrinking then
+            humanoid.WalkSpeed = 6 -- Lentidão severa ao beber frasco
+        elseif ClientState.IsGuarding then
             humanoid.WalkSpeed = WALK_SPEED * 0.4 -- Lentidão de 60%
         else
             humanoid.WalkSpeed = WALK_SPEED

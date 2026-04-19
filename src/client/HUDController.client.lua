@@ -142,6 +142,23 @@ end
 
 local slotTop = createSlot("SlotMagic", UDim2.new(0, 52, 0, 5), Color3.fromRGB(20, 20, 60), "Top")
 local slotBottom = createSlot("SlotItem", UDim2.new(0, 52, 0, 100), Color3.fromRGB(20, 60, 20), "Bottom")
+
+-- Contador de Frascos
+local flaskCountLabel = Instance.new("TextLabel")
+flaskCountLabel.Name = "FlaskCount"
+flaskCountLabel.Size = UDim2.new(0, 20, 0, 15)
+flaskCountLabel.Position = UDim2.new(1, -22, 1, -15) -- Alinhado ao canto inferior direito
+flaskCountLabel.BackgroundTransparency = 1
+flaskCountLabel.Text = tostring(ClientState.CurrentFlasks)
+flaskCountLabel.TextColor3 = Color3.new(1, 1, 1)
+flaskCountLabel.TextStrokeTransparency = 0
+flaskCountLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+flaskCountLabel.Font = Enum.Font.GothamBold
+flaskCountLabel.TextSize = 14
+flaskCountLabel.TextXAlignment = Enum.TextXAlignment.Right
+flaskCountLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+flaskCountLabel.Parent = slotBottom
+
 local slotLeft = createSlot("SlotShield", UDim2.new(0, 5, 0, 52), Color3.fromRGB(40, 40, 40), "Left")
 local slotRight = createSlot("SlotWeapon", UDim2.new(0, 100, 0, 52), Color3.fromRGB(60, 20, 20), "Right")
 
@@ -197,4 +214,18 @@ staminaChangedEvent.Event:Connect(function(currentStamina, maxStamina)
     local targetSize = UDim2.new(scale, 0, 1, 0)
     local tween = TweenService:Create(staminaFill, tweenInfo, {Size = targetSize})
     tween:Play()
+end)
+
+-- Escuta mudanças no contador de Frascos
+local flaskEvent = script.Parent:FindFirstChild("FlaskUsedEvent")
+if not flaskEvent then
+    flaskEvent = Instance.new("BindableEvent")
+    flaskEvent.Name = "FlaskUsedEvent"
+    flaskEvent.Parent = script.Parent
+end
+
+flaskEvent.Event:Connect(function(newCount)
+    if flaskCountLabel then
+        flaskCountLabel.Text = tostring(newCount)
+    end
 end)
