@@ -18,6 +18,7 @@ local humanoid = character:WaitForChild("Humanoid")
 local staminaController = script.Parent:WaitForChild("StaminaController")
 local requestStaminaDrain = staminaController:WaitForChild("RequestStaminaDrain")
 local damageEvent = ReplicatedStorage:WaitForChild("DamageEvent")
+local healEvent = ReplicatedStorage:WaitForChild("HealEvent")
 
 local flaskEvent = script.Parent:FindFirstChild("FlaskUsedEvent")
 if not flaskEvent then
@@ -81,7 +82,7 @@ local function UseFlask()
             task.wait(0.6) -- Tempo que leva o frasco até a boca
             
             if ClientState.IsDrinking then -- Verifica se não foi cancelado
-                humanoid.Health = math.clamp(humanoid.Health + (maxHealth * 0.4), 0, maxHealth)
+                healEvent:FireServer(maxHealth * 0.4)
                 ClientState.CurrentFlasks = ClientState.CurrentFlasks - 1
                 print("Frasco usado! Restam: " .. ClientState.CurrentFlasks)
                 

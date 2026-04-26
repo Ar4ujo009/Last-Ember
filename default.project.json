@@ -9,6 +9,9 @@
       },
       "DamageEvent": {
         "$className": "RemoteEvent"
+      },
+      "HealEvent": {
+        "$className": "RemoteEvent"
       }
     },
 
