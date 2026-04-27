@@ -51,6 +51,11 @@ AttackEvent.OnServerEvent:Connect(function(player)
     local rootPart = character:FindFirstChild("HumanoidRootPart")
     
     if not humanoid or not rootPart or humanoid.Health <= 0 then return end
+    
+    local equippedTool = character:FindFirstChildOfClass("Tool")
+    if not equippedTool then
+        return warn("Tentativa de ataque sem arma por: " .. player.Name)
+    end
 
     -- Criar Hitbox na frente do jogador (4x5x4, 3 studs à frente)
     local hitboxSize = Vector3.new(4, 5, 4)

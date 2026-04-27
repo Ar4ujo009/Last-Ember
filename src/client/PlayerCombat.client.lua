@@ -53,6 +53,9 @@ local function PerformAttack()
     if isAttacking or ClientState.IsDrinking or ClientState.IsGuarding then return end
     if tick() - lastAttackTime < ATTACK_COOLDOWN then return end
     
+    local equippedTool = character:FindFirstChildOfClass("Tool")
+    if not equippedTool then return end
+    
     local hasStamina = requestStaminaDrain:Invoke(ATTACK_STAMINA_COST)
     if not hasStamina then return end
     
