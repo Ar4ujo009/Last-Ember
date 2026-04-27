@@ -1,0 +1,71 @@
+[33mcommit 68fe4cf41fb354b84b763b0458a00d0d19a766bd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 26 15:06:52 2026 -0300
+
+    fix: resolve rollback de cura delegando alteracao de vida para o servidor via RemoteEvent
+
+[33mcommit f25f83f7cdde32a34c9cd3ababcf5795e5e162e1[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 20:41:33 2026 -0300
+
+    feat: implementa sistema de refil de frascos ao renascer
+
+[33mcommit 58b4c86dfa209a6c9b24b876f071eb8e9ad906f5[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 20:25:12 2026 -0300
+
+    feat: implementa frasco de cura estilo elden ring com delay e contador na HUD
+
+[33mcommit 619f5f6e324a71165997959c0295376eb9ad127d[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 19:27:29 2026 -0300
+
+    chore: refatoracao, organizacao de variaveis e remocao de codigos de debug
+
+[33mcommit 268871e55bb35d07c612f8c8a2061ebda1a4a055[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 19:12:47 2026 -0300
+
+    style: remove textos provisorios da hotbar deixando como slots vazios
+
+[33mcommit 96713714698b471cb7af9be8a8d00dde37e2d998[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 18:29:44 2026 -0300
+
+    feat: adiciona sistema de Mana (FP) e atualiza HUD com a barra azul
+
+[33mcommit dde0aca958a6039f7f251ddc0ee7d60cbeeee7bc[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 14:03:43 2026 -0300
+
+    feat: implementa HUD minimalista estiloElden Ring com tweenService para suavização.
+
+[33mcommit def8293ab17243296c848f444f2f796e8fb241f3[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 13:30:28 2026 -0300
+
+    feat: implementa camera over-the-shoulder no estado normal e lock-on
+
+[33mcommit 70558b09391038c91ceff04d57fbda585bc7d331[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 03:25:23 2026 -0300
+
+    feat: adiciona camera suave (lerp) no lock-on e oculta cursor do mouse
+
+[33mcommit 0970d1bbe508965adbf6bf496054435f8b435273[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sun Apr 19 02:21:25 2026 -0300
+
+    Sistema de combate RayCast na espada.
+
+[33mcommit 7e96c6f8c201af120117c1f52ab0d006e4e58dbd[m
+Author: Ar4ujo009 <rafafarias092009@gmail.com>
+Date:   Sat Apr 18 23:59:47 2026 -0300
+
+    Versao Betinha 1.0.0
+
+[33mcommit d38250a9c6d376e31971539b9bc04d159f3340fe[m
+Author: Rafael Farias de Araujo <rafafarias092009@gmail.com>
+Date:   Sat Apr 18 20:22:15 2026 -0300
+
+    Initial commit

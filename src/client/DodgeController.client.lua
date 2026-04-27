@@ -104,10 +104,9 @@ end
 -- CONTROLE DE INPUT
 -- ==========================================
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    
+    if gameProcessed then return end 
     -- Se o jogador apertar Q ou LeftAlt, tenta esquivar
     if input.KeyCode == Enum.KeyCode.Q or input.KeyCode == Enum.KeyCode.LeftAlt then
-        Dodge()
+        Dodge();
     end
 end)
